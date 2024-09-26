@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+"""
+Groq LLM CLI Script
+
+Sends input to a Language Learning Model (LLM) and streams responses.
+Supports direct user prompts or text files with [SYSTEM], [USER], and [ASSISTANT] roles.
+
+Usage:
+1. Direct Prompt: `groq_cli.py "your prompt here"`
+2. File Input: `groq_cli.py input.txt`
+3. File Output: `groq_cli.py input.txt > out.txt`
+"""
+
+import sys
+import time
+import argparse
+import re
+import os
+from groq import Groq
+
+MODEL = "llama3-8b-8192"
+# MODEL = "llama-3.1-70b-versatile"
+# MODEL = "llama-3.2-11b-text-preview"
+MAX_TOKENS = 1024
+TEMPERATURE = 0.1
+TOP_P = 1
+MAX_RETRIES = 3
+
+def fetch_completion(messages, stream=False):
+    client = Groq()
+    for attempt in range(MAX_RETRIES):
+        try:
+            return client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                temperature=TEMPERATURE,
+                max_tokens=MAX_TOKENS,
+                top_p=TOP_P,
+                stream=stream,
+            )
+        except Exception as e:
+            if attempt == MAX_RETRIES - 1:
+                print(f"Max retries reached. Error: {e}", file=sys.stderr)
+                return None
+            time.sleep(2 ** attempt)
+
+def parse_messages(content):
+    blocks = re.split(r'\[(SYSTEM|USER|ASSISTANT)\]\n', content, flags=re.IGNORECASE)
+    messages = []
+    for i in range(1, len(blocks), 2):
+        role = blocks[i].lower()
+        content = blocks[i+1].strip()
+        if content:
+            messages.append({"role": role, "content": content})
+    return messages
+
+def process_output(completion, stream):
+    if stream:
+        for chunk in completion:
+            content = chunk.choices[0].delta.content or ""
+            print(content, end="", flush=True)
+            time.sleep(0.025)
+        print()
+    else:
+        print(completion.choices[0].message.content)
+
+def main():
+    parser = argparse.ArgumentParser(description="Run Groq LLM chat script")
+    parser.add_argument('input', help='Path to input file or direct prompt')
+    args = parser.parse_args()
+
+    stream = sys.stdout.isatty()
+
+    if os.path.isfile(args.input):
+        with open(args.input, 'r', encoding='utf-8') as file:
+            messages = parse_messages(file.read())
+    else:
+        messages = [{"role": "user", "content": args.input.strip()}]
+
+    completion = fetch_completion(messages, stream=stream)
+
+    if completion:
+        process_output(completion, stream)
+    else:
+        print("Failed to retrieve completion.", file=sys.stderr)
+
+if __name__ == "__main__":
+    main()
