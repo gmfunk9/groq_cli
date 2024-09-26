@@ -7,9 +7,9 @@ Sends input to a Language Learning Model (LLM) and streams responses.
 Supports direct user prompts or text files with [SYSTEM], [USER], and [ASSISTANT] roles.
 
 Usage:
-1. Direct Prompt: `groq_cli.py "your prompt here"`
-2. File Input: `groq_cli.py input.txt`
-3. File Output: `groq_cli.py input.txt > out.txt`
+1. Direct Prompt: `groq_cli "your prompt here"`
+2. File Input: `groq_cli input.txt`
+3. File Output: `groq_cli input.txt > out.txt`
 """
 
 import sys
