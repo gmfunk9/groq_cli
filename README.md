@@ -33,17 +33,17 @@ The script can be used in three main ways:
 
 1. Direct Prompt:
    ```
-   python groq_cli.py "your prompt here"
+   groq_cli "your prompt here"
    ```
 
 2. File Input:
    ```
-   python groq_cli.py input.txt
+   groq_cli input.txt
    ```
 
 3. File Output:
    ```
-   python groq_cli.py input.txt > output.txt
+   groq_cli input.txt > output.txt
    ```
 
 ### Input File Structure
