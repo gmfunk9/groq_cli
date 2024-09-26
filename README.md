@@ -22,6 +22,10 @@ This Python script provides a command-line interface for interacting with Groq's
    ```
    pip install groq
    ```
+4. Move into: /usr/local/bin/groq_cli
+   ```
+   mv groq_cli /usr/local/bin/groq_cli
+   ```
 
 ## Usage
 
